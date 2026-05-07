@@ -1,1 +1,2 @@
-# RosettaRAG
+# RosettaRAG 
+RosettaRAG - RAG based project. 
