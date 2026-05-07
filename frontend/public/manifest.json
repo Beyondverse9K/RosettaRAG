@@ -1,0 +1,8 @@
+{
+  "short_name": "Rosetta",
+  "name": "Rosetta - Private Enterprise RAG",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0B0F19",
+  "background_color": "#0B0F19"
+}

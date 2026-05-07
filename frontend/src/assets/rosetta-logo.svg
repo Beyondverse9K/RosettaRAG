@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    {/* The main stone tablet silhouette, meticulously traced from the uploaded photo */}
+    <path
+            d="M3.5 12L8 3.5C8.8 2.5 10 2 13 2H18C19.5 2 20.5 3 20.5 4.5V18C20.5 19.5 19.5 21 17.5 21.5L8 22C5 22 3.5 20.5 3.5 18V12Z"
+            fill="currentColor"
+    />
+
+    {/* Hieroglyphs (Top Section - spaced, blocky dashes) */}
+    <path d="M8 5H18M7.5 7H18M7 9H18" stroke="#0B0F19" stroke-width="0.75" stroke-dasharray="1 1.5" stroke-linecap="round"/>
+
+    {/* Demotic (Middle Section - dense, continuous dashes) */}
+    <path d="M5.5 12H18.5M5 14H18.5M4.5 16H18.5" stroke="#0B0F19" stroke-width="0.75" stroke-dasharray="2 1" stroke-linecap="round"/>
+
+    {/* Ancient Greek (Bottom Section - tight, even dashes) */}
+    <path d="M4.5 19H17M5 20.5H14" stroke="#0B0F19" stroke-width="0.75" stroke-dasharray="1 1" stroke-linecap="round"/>
+</svg>
