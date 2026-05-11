@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import './styles/App.css'; // Import our new CSS
+import './styles/App.css'; 
 import Sidebar from './components/Sidebar';
 import ChatFeed from './components/ChatFeed';
 import FloatingInput from './components/FloatingInput';
@@ -19,7 +19,7 @@ function App() {
     setInput('');
     setLoading(true);
 
-    const API_URL = 'http://localhost:8000' || process.env.REACT_APP_API_URL;
+    const API_URL =  process.env.REACT_APP_API_URL;
 
     try {
       const response = await axios.post(`${API_URL}/api/chat`, {
