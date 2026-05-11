@@ -22,6 +22,7 @@ app.add_middleware(
 # Mount Routes
 app.include_router(chat_router, prefix="/api")
 
+@app.head("/")
 @app.get("/")
 def health_check():
     return {"status": "RosettaRAG Backend is running securely."}
