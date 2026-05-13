@@ -12,7 +12,7 @@ class Config:
     NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
     PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
     PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "enterprise-rag-index")
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 settings = Config()
