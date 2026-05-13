@@ -39,8 +39,4 @@ app.include_router(chat_router, prefix="/api")
 @app.head("/")
 @app.get("/")
 def health_check():
-<<<<<<< Updated upstream
-    return {"status": "RosettaRAG Backend is running securely."}
-=======
     return {"status": "RosettaRAG Backend is running securely with Persistent Memory."}
->>>>>>> Stashed changes
