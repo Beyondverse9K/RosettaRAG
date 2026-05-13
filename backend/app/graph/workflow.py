@@ -115,12 +115,16 @@ workflow.add_edge("reject_node", END)
 connection_kwargs = {
     "autocommit": True,
     "prepare_threshold": 0,
+    "keepalives": 1,
+    "keepalives_idle": 30,
+    "keepalives_interval": 10,
+    "keepalives_count": 5,      
 }
-
 # Create a connection pool using your Neon DATABASE_URL
 pool = ConnectionPool(
     conninfo=settings.DATABASE_URL,
     max_size=20,
+    max_lifetime=300,
     kwargs=connection_kwargs,
 )
 
