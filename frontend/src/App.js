@@ -56,7 +56,6 @@ function App() {
 
     return (
         <div className="flex h-screen bg-[#0B0F19] text-slate-300 font-sans selection:bg-cyan-500/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay z-0"></div>
             <Sidebar />
             <div className="flex-1 flex flex-col h-full relative z-10">
                 <ChatFeed messages={messages} loading={loading} />
