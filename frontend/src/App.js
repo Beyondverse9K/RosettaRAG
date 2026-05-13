@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import './styles/App.css';
@@ -11,7 +10,7 @@ function App() {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // NEW: Generate a unique thread ID for this user's session
+    // Generate a unique thread ID for this user's session
     const [threadId] = useState(() => {
         let id = sessionStorage.getItem('rosetta_thread_id');
         if (!id) {
@@ -29,13 +28,12 @@ function App() {
         setInput('');
         setLoading(true);
 
-        // FIXED: Environment variable now takes priority
         const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
         try {
             const response = await axios.post(`${API_URL}/api/chat`, {
                 query: input,
-                thread_id: threadId // NEW: Send the thread ID to the backend
+                thread_id: threadId // Send the thread ID to the backend
             });
 
             const botMsg = {
