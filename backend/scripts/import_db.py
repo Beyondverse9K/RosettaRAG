@@ -9,6 +9,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from pinecone import Pinecone
 from app.core.llm_setup import get_embeddings
 
 load_dotenv()
@@ -199,7 +200,10 @@ def ingest_sql_data():
 # 3. Graph DB Ingestion (Neo4j Aura)
 # ==========================================
 def ingest_graph_data():
-    print(f"\nStarting Graph Ingestion (Hierarchy & Project Nodes)")
+    num_hierarchy = len(hierarchy)
+    num_assignments = len(project_assignments)
+    total_rels = num_hierarchy + num_assignments
+    print(f"\nStarting Graph Ingestion ({total_rels} Relationships, {num_assignments} Project Nodes, {num_hierarchy} Direct Reports")
     uri = os.getenv("NEO4J_URI")
     user = os.getenv("NEO4J_USERNAME", "neo4j")
     pwd = os.getenv("NEO4J_PASSWORD")
@@ -254,6 +258,9 @@ def ingest_vector_data():
     if not api_key or not gemini_key: return print("Skipping Vector: Pinecone or Gemini API keys missing.")
 
     try:
+        pc = Pinecone(api_key=api_key)
+        index = pc.Index(index_name)
+        index.delete(delete_all=True)
         embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2-preview", google_api_key=gemini_key)
         docs = []
 
