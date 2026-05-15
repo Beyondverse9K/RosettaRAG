@@ -34,8 +34,8 @@ RosettaRAG is an Private Enterprise Retrieval-Augmented Generation (RAG) system 
 - Faker-based synthetic dataset generator
 
 **Deployment**
-- Render (Backend)
-- Netlify (Frontend)
+- Render (Backend) https://rosetta-private-enterprise-rag.onrender.com/
+- Netlify (Frontend) https://rosetta-private-enterprise-rag.netlify.app/
 
 ## Architecture
 
