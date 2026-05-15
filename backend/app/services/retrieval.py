@@ -1,3 +1,4 @@
+import ast
 from pydantic import BaseModel, Field
 from langchain_core.prompts import PromptTemplate
 from app.core.llm_setup import get_utility_llm
@@ -12,17 +13,36 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
     valid_docs = []
     docs_to_grade = []
 
-    # 1. Immediate Bypass for Structured Data
+    # 1. Immediate Bypass for Structured Data & Metadata Match
     for doc in documents:
-        # If the document is an actual Python list (from Neo4j) and it's not empty
-        if isinstance(doc, list) and len(doc) > 0:
-            valid_docs.append(str(doc))
-        # If the document is a string starting with SQL Result
-        elif isinstance(doc, str) and doc.startswith("SQL Result:") and "[]" not in doc:
-            valid_docs.append(doc)
-        # Otherwise, it needs LLM grading (Vector DB chunks or empty lists)
-        else:
-            docs_to_grade.append(str(doc))
+        doc_str = str(doc)
+
+        # Pass SQL and Graph results immediately
+        if (isinstance(doc, list) and len(doc) > 0) or \
+                (doc_str.startswith("SQL Result:") and "[]" not in doc_str):
+            valid_docs.append(doc_str)
+            continue
+
+        # Parse Vector DB documents to check metadata
+        try:
+            if " | METADATA: " in doc_str:
+                # Neatly unpack the string we created in query_construction.py
+                content_str, meta_str = doc_str.split(" | METADATA: ", 1)
+                content_str = content_str.replace("CONTENT: ", "", 1).strip()
+                metadata = ast.literal_eval(meta_str.strip())
+
+                q_lower = question.lower()
+                source = metadata.get("source", "").lower()
+
+                # WIDENED RULE: If the user asks for policies, and the source is ANY policy, pass it!
+                if "policy" in q_lower and "policy" in source:
+                    valid_docs.append(content_str)
+                    continue
+        except Exception:
+            pass  # If parsing fails, fall back to LLM grading
+
+        # If it didn't pass the deterministic checks, queue it for the LLM
+        docs_to_grade.append(doc_str)
 
     # 2. Only run the LLM Grader if we actually have fuzzy documents to grade
     if docs_to_grade:
@@ -30,13 +50,18 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
         structured_llm = llm.with_structured_output(GradeDocuments)
 
         prompt = PromptTemplate(
-            template="You are a grader assessing relevance of a retrieved document to a user question.\n"
-                     "Document: {document}\nQuestion: {question}\n"
-                     """CRITICAL GRADING RULE: If the user asks a broad, aggregative, or plural question 
-                     (e.g., 'list all', 'what are the', 'total number'), you MUST score 'yes' if the document 
-                     contains ANY single piece of information that belongs in that list or contributes to the overall 
-                     answer. Do not reject a document just because it cannot answer the entire question on its own."""
-                     "Give a binary score 'yes' or 'no' indicating if the document is relevant.",
+            template="""You are an expert evaluator assessing the relevance of a retrieved document to a user's question.
+            Document: {document}
+            Question: {question}
+
+            GRADING INSTRUCTIONS:
+            1. DIRECT MATCH: If the document contains the explicit answer to the question, score 'yes'.
+            2. PARTIAL/LIST AGGREGATION: If the question asks for a list, summary, or aggregation (e.g., 'list all', 'what are the', 'total number'), score 'yes' if the document contains ANY single piece of information that contributes to the final assembled answer. Do not reject a document just because it cannot answer the entire question alone.
+            3. CATEGORICAL LENIENCY: Evaluate relevance based on semantic utility, not strict corporate taxonomy. If a document logically serves the user's broader intent (e.g., treating an 'InfoSec' or 'Ethics' rule as a general 'Company Policy'), score 'yes'.
+            4. DATABASE OUTPUTS: If the document contains raw database relationships or entity lists that match the subjects in the question, score 'yes'.
+
+            Give a binary score 'yes' or 'no' indicating if the document is relevant to the question."""
+            ,
             input_variables=["document", "question"],
         )
         chain = prompt | structured_llm
@@ -46,8 +71,12 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
             if doc_str == "[]" or doc_str == "SQL Result: []":
                 continue
 
-            score = chain.invoke({"question": question, "document": doc_str})
+            # Strip metadata before showing the LLM so it doesn't get confused
+            clean_doc_str = doc_str.split(" | METADATA: ")[0].replace("CONTENT: ", "",
+                                                                      1).strip() if " | METADATA: " in doc_str else doc_str
+
+            score = chain.invoke({"question": question, "document": clean_doc_str})
             if score.binary_score == "yes":
-                valid_docs.append(doc_str)
+                valid_docs.append(clean_doc_str)
 
     return valid_docs, False

@@ -34,8 +34,11 @@ def route_question(question: str, messages: list = None) -> str:
     # Format chat history for context
     formatted_messages = [{"role": "system", "content": system_msg}]
     if messages:
+        # KEEP ONLY THE LAST 6 MESSAGES (3 Question/Answer pairs)
+        recent_messages = messages[-6:] if len(messages) > 6 else messages
+
         # Exclude the very last message since it's the current question
-        for msg in messages[:-1]:
+        for msg in recent_messages[:-1]:
             role = "user" if msg.type == "human" else "assistant"
             formatted_messages.append({"role": role, "content": msg.content})
 

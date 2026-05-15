@@ -29,7 +29,7 @@ def retrieve_from_sql(question: str) -> str:
     """Text-to-SQL execution."""
     if not db: return "SQL DB not configured."
     llm = get_query_llm()
-    chain = create_sql_query_chain(llm, db, k=50)
+    chain = create_sql_query_chain(llm, db, k=151)
     try:
         query = chain.invoke({"question": question})
         clean_query = query.replace("```sql", "").replace("```", "").replace("SQLQuery:", "").strip()
@@ -121,8 +121,8 @@ def retrieve_from_vector(question: str) -> list[str]:
         valid_docs = []
         for doc, score in results:
             # Only keep documents that are an actual strong semantic match
-            if score >= 0.70:
-                valid_docs.append(doc.page_content)
+            if score >= 0.60:
+                valid_docs.append(f"CONTENT: {doc.page_content} | METADATA: {doc.metadata}")
 
         return valid_docs
     except Exception as e:
@@ -197,7 +197,9 @@ def retrieve_multi_hop(question: str, messages: list = None) -> str:
     # Give the agent access to the full conversation memory
     agent_messages = []
     if messages:
-        agent_messages.extend(messages)
+        # KEEP ONLY THE LAST 6 MESSAGES (3 Question/Answer pairs)
+        recent_messages = messages[-6:] if len(messages) > 6 else messages
+        agent_messages.extend(recent_messages)
     else:
         agent_messages.append(("human", question))
 

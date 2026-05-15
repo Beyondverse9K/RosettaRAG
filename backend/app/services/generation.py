@@ -14,8 +14,10 @@ def generate_answer(question: str, documents: list[str], messages: list = None) 
     history_str = ""
     if messages and len(messages) > 1:
         history_str = "--- CONVERSATION HISTORY ---\n"
+        # KEEP ONLY THE LAST 6 MESSAGES (3 Question/Answer pairs)
+        recent_messages = messages[-6:] if len(messages) > 6 else messages
         # We exclude the last message since it's the current question
-        for msg in messages[:-1]:
+        for msg in recent_messages[:-1]:
             role = "User" if msg.type == "human" else "Assistant"
             history_str += f"{role}: {msg.content}\n"
         history_str += "----------------------------\n"
@@ -23,10 +25,10 @@ def generate_answer(question: str, documents: list[str], messages: list = None) 
     prompt = (
         f"Answer the question based ONLY on the provided context.\n"
         f"MISSING DATA: If the context explicitly states that no relevant documents were found, reply exactly with: 'That Information is not present in my knowledge base'. Do NOT trigger the corporate guardrail.\n"
+        f"HISTORY OVERRIDE: Use the Conversation History to understand pronouns or context (e.g., 'What about their budget?'). However, if the user asks a question that is similar or identical to a previous question, IGNORE the history and answer it fresh using ONLY the current Context block.\n"
         f"CRITICAL INSTRUCTION: If the context contains raw database output, such as a SQL Result (e.g., `[('Name',)]`) or Neo4j JSON (e.g., `[{{'e.name': 'Name'}}]`), you MUST treat those raw values as the factual answer to the user's question and output them confidently in a natural sentence. Do NOT trigger the corporate guardrail if you see raw database results.\n"
         f"DEDUPLICATION & AGGREGATION OVERRIDE: If the context contains a raw list of entities or aggregated numbers (e.g., `[{{'Project': 'Name'}}]` or `[{{'SubordinateCount': 5}}]`), you MUST ASSUME the database correctly pre-filtered and calculated them based on the user's exact criteria. Output the information confidently as the answer, even if the filtering criteria (like department names) are not explicitly visible in the context.\n"
-        f"IMPORTANT: All monetary values must be formatted as Indian Rupees (INR) using the ₹ symbol "
-        f"and the Indian numbering system (e.g., ₹5,00,00,000).\n\n"
+        f"IMPORTANT: All monetary values must be formatted as Indian Rupees (INR) using the ₹ symbol and the Indian numbering system (e.g., ₹5,00,00,000).\n\n"
         f"{history_str}\n"
         f"Context: {docs_str}\n"
         f"Question: {question}\n"

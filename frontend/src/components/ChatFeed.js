@@ -22,7 +22,7 @@ export default function ChatFeed({ messages, loading }) {
                         <Code className="absolute text-blue-400 w-2 h-2" strokeWidth={3} />
                     </div>
                 ),
-                text: 'PostgreSQL',
+                text: 'Neon PostgreSQL',
                 color: 'text-blue-400 border-blue-400/30 bg-blue-400/10'
             },
             graph_db: {
@@ -33,7 +33,7 @@ export default function ChatFeed({ messages, loading }) {
                     </div>
                 ),
                 text: 'Neo4j Graph',
-                color: 'text-purple-400 border-purple-400/30 bg-purple-400/10'
+                color: 'text-orange-400 border-orange-400/30 bg-orange-400/10'
             },
             vector_db: {
                 icon: (
@@ -65,7 +65,7 @@ export default function ChatFeed({ messages, loading }) {
                 </div>
             ),
             text: 'Routing Engine',
-            color: 'text-slate-400 border-slate-400/30 bg-slate-400/10'
+            color: 'text-indigo-400 border-indigo-400/30 bg-indigo-400/10'
         };
 
         return (

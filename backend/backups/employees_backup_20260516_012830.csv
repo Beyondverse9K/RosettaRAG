@@ -1,0 +1,152 @@
+id,name,department,salary,role
+1,Jim Walker,Executive,650000,CEO
+2,Tracy Richardson,Engineering,383000,CTO
+3,Sean Pugh,Finance,276000,CFO
+4,Matthew Miller,Operations,373000,COO
+5,Andrea Ross,Marketing,260000,CMO
+6,Ashley Buck,Sales,344000,CRO
+7,Joanne Salinas,HR,272000,CHRO
+8,Tyler King,Product,294000,CPO
+9,Ashley Morris,Legal,352000,CLO
+10,Mark Doyle,IT,335000,CIO
+11,Sarah Kim,Customer Success,365000,CCO
+12,Suzanne Abbott,Engineering,330000,Director of Engineering
+13,Robert Jones,Engineering,165000,Director of Engineering
+14,Erika Johnson,Finance,307000,Director of Finance
+15,Christopher Allen,Finance,211000,Director of Finance
+16,Angela Thompson,Operations,301000,Director of Operations
+17,Brett Palmer,Operations,302000,Director of Operations
+18,Sheila Gill,Marketing,181000,Director of Marketing
+19,Donald Pacheco,Marketing,190000,Director of Marketing
+20,Lisa Hess,Sales,297000,Director of Sales
+21,Samantha Harmon,Sales,237000,Director of Sales
+22,Leslie Hernandez,HR,323000,Director of HR
+23,Sandra Eaton,HR,258000,Director of HR
+24,Jessica Cooper,Product,292000,Director of Product
+25,Mary Williams,Product,309000,Director of Product
+26,Emily Gonzalez,Legal,286000,Director of Legal
+27,Sandra Frederick,Legal,256000,Director of Legal
+28,David Miller,IT,179000,Director of IT
+29,Frank Hull,IT,298000,Director of IT
+30,Sandra Smith,Customer Success,316000,Director of Customer Success
+31,Brett Adams,Customer Success,292000,Director of Customer Success
+32,Reginald Mejia,IT,91000,Systems Administrator
+33,Brianna Ayers,Legal,140000,Paralegal
+34,Timothy Crawford,Customer Success,170000,Implementation Consultant
+35,April Davis,Legal,52000,Corporate Counsel
+36,Laura Nash,Marketing,161000,Campaign Manager
+37,Cynthia Hernandez,Operations,117000,Supply Chain Manager
+38,Sandra Diaz,Engineering,206000,Frontend Engineer
+39,Jennifer Jimenez,Customer Success,155000,Technical Support Specialist
+40,Laura Dominguez,Customer Success,145000,Technical Support Specialist
+41,Kevin Boone,Product,70000,Technical Writer
+42,Michelle Ray,Engineering,132000,Data Scientist
+43,Kelly Schmidt,Engineering,180000,DevOps Engineer
+44,Jesse Clark,Customer Success,147000,Technical Support Specialist
+45,Tara Salas,Finance,87000,Financial Analyst
+46,Elizabeth Hatfield,Sales,86000,Account Executive
+47,Kelsey Bass,Sales,103000,Sales Development Rep
+48,Rachel Smith,Product,172000,Scrum Master
+49,James Sims,Operations,168000,Operations Analyst
+50,Misty Wallace,Finance,164000,Tax Specialist
+51,Hector Gutierrez,Product,162000,Technical Writer
+52,Sharon Turner,Engineering,105000,Backend Engineer
+53,Kristin Khan,Customer Success,68000,Implementation Consultant
+54,Dr. Brian Brown,Marketing,143000,PR Specialist
+55,Jennifer Wilson,Finance,125000,Payroll Specialist
+56,Brenda Young,Customer Success,174000,Implementation Consultant
+57,Kristina Boyd,Engineering,147000,Frontend Engineer
+58,Jillian Stanley,Engineering,174000,QA Automation Engineer
+59,Edwin Powell,Marketing,171000,Campaign Manager
+60,Natasha Wolfe,IT,178000,Cybersecurity Analyst
+61,Chase Thomas,Operations,151000,Operations Analyst
+62,Robert Terrell,Finance,131000,Financial Analyst
+63,Steven Moore,Marketing,151000,SEO Specialist
+64,Jesus Henson,Product,104000,UX Researcher
+65,Jason Wells,Customer Success,193000,Customer Success Manager
+66,Jeffrey Garcia,Marketing,200000,PR Specialist
+67,Ruth Thomas,Product,110000,UI Designer
+68,Steven Boone,Engineering,157000,Data Scientist
+69,Jackson Howard,Legal,93000,Paralegal
+70,Sara Phillips,Legal,61000,Compliance Officer
+71,Mike Smith,Finance,129000,Accountant
+72,Joseph Mcbride,HR,190000,Diversity & Inclusion Specialist
+73,Barbara Duncan,Engineering,91000,QA Automation Engineer
+74,William Ball,HR,191000,Diversity & Inclusion Specialist
+75,Jeffrey Long,Engineering,162000,DevOps Engineer
+76,Jesse Greene,Marketing,174000,SEO Specialist
+77,Scott Smith,Customer Success,80000,Implementation Consultant
+78,Daniel Foley,Product,92000,Product Manager
+79,Leslie Harris,Finance,150000,Controller
+80,Sara Dawson,IT,93000,Helpdesk Technician
+81,Jose Alvarado,Finance,95000,Tax Specialist
+82,Arthur Andrade,Sales,62000,Sales Development Rep
+83,Scott Campbell,Operations,96000,Facilities Manager
+84,Jacob Roberts,Product,163000,Scrum Master
+85,Taylor Lang,Marketing,100000,Graphic Designer
+86,Kara Gonzalez,Engineering,160000,DevOps Engineer
+87,Melissa Campos,Customer Success,148000,Technical Support Specialist
+88,Melissa Ryan,Marketing,128000,Content Strategist
+89,Shawn Barrett,HR,116000,Benefits Coordinator
+90,Nicole Torres,Finance,148000,Payroll Specialist
+91,Shawn Smith,IT,117000,Cybersecurity Analyst
+92,Paul Walton,Customer Success,171000,Implementation Consultant
+93,Maria Shepherd,Product,60000,Technical Writer
+94,Joseph Rivera,Operations,113000,Facilities Manager
+95,Ronald Garcia,Engineering,156000,DevOps Engineer
+96,Keith Campbell,IT,116000,Systems Administrator
+97,Jesus Carroll,HR,99000,Benefits Coordinator
+98,Jenny Woods,Legal,138000,Compliance Officer
+99,Craig Holloway,IT,99000,Network Engineer
+100,Lori Lynn,Finance,117000,Accountant
+101,Scott Malone,HR,141000,Diversity & Inclusion Specialist
+102,Mark Quinn,Legal,71000,Compliance Officer
+103,Richard Lewis,Operations,110000,Operations Analyst
+104,Jeffrey Murray,Marketing,130000,SEO Specialist
+105,Krystal Jackson,Legal,163000,Corporate Counsel
+106,John Garcia,Finance,161000,Controller
+107,Colton Fisher,Product,122000,Technical Writer
+108,Timothy Shields,Engineering,155000,Data Scientist
+109,Laura Ortega,IT,65000,Cybersecurity Analyst
+110,Rachel Robinson,Legal,93000,Corporate Counsel
+111,Penny Reese,Marketing,199000,PR Specialist
+112,Donald Martinez,Customer Success,56000,Implementation Consultant
+113,Victoria Cole,Customer Success,71000,Implementation Consultant
+114,Katherine Yang,Engineering,145000,QA Automation Engineer
+115,Sheri Oneal,Product,81000,UI Designer
+116,Craig Miller,Product,70000,UX Researcher
+117,Timothy Harris,IT,144000,Systems Administrator
+118,Samantha Johnson,HR,139000,Diversity & Inclusion Specialist
+119,Brandon Bradford,Marketing,180000,Content Strategist
+120,Paul Conway,IT,135000,Cybersecurity Analyst
+121,Shane Bryant,Marketing,131000,Campaign Manager
+122,Mathew Reynolds,Operations,92000,Logistics Coordinator
+123,Courtney Byrd,Finance,151000,Controller
+124,Frank Murphy,Product,108000,UI Designer
+125,Michael Stone,Product,71000,UX Researcher
+126,Sabrina Brown,Finance,174000,Payroll Specialist
+127,Katie Michael,Finance,120000,Controller
+128,Jason Mullen,IT,100000,Network Engineer
+129,Eugene Rogers,Engineering,148000,Frontend Engineer
+130,Brandy Olsen,HR,105000,HR Business Partner
+131,Angela Paul,IT,128000,Cybersecurity Analyst
+132,Amy Miller,HR,117000,HR Business Partner
+133,Renee Park,IT,143000,Network Engineer
+134,Christine Clark,Marketing,135000,PR Specialist
+135,Shawn Moore,Customer Success,201000,Customer Success Manager
+136,Elizabeth Adams,IT,57000,Cybersecurity Analyst
+137,Lisa Russo,IT,52000,Helpdesk Technician
+138,Ross Reed,IT,87000,Cybersecurity Analyst
+139,Jonathan Woodward,Legal,148000,Contracts Administrator
+140,Amber Anderson,Legal,123000,Paralegal
+141,Ms. Jennifer Hall,Legal,147000,Contracts Administrator
+142,Henry Jones,Operations,109000,Facilities Manager
+143,Mario Jensen,Marketing,190000,SEO Specialist
+144,Curtis Barnett,Product,158000,Product Manager
+145,Benjamin Williamson,Marketing,175000,PR Specialist
+146,Bobby Smith,Operations,101000,Supply Chain Manager
+147,Charlene Wall,IT,129000,Helpdesk Technician
+148,Ryan Martin,Operations,107000,Facilities Manager
+149,Diane Scott,Finance,154000,Accountant
+150,Ricky Perry,Product,52000,Scrum Master
+151,Stephanie Perez,Legal,115000,Contracts Administrator

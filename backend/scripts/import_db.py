@@ -53,15 +53,26 @@ employees = []
 projects = []
 hierarchy = []  # Tuples of (employee_id, manager_id)
 project_assignments = []  # Tuples of (employee_id, project_id, role)
+used_project_names = set()
 
 # 1a. Generate 15 Projects
 for i in range(1, 16):
-    projects.append({
-        "id": f"P{i}",
-        "name": f"Project {random.choice(PROJECT_ADJECTIVES)} {random.choice(PROJECT_NOUNS)}",
-        "budget": random.randint(50, 10000) * 100000,
-        "status": random.choice(["Active", "Planning", "Completed", "On Hold"])
-    })
+    while True:
+        # Generate a candidate name from your custom lists
+        adj = random.choice(PROJECT_ADJECTIVES)
+        noun = random.choice(PROJECT_NOUNS)
+        project_name = f"Project {adj} {noun}"
+
+        # Check if we've used this exact name before
+        if project_name not in used_project_names:
+            used_project_names.add(project_name)
+            projects.append({
+                "id": f"P{i}",
+                "name": project_name,
+                "budget": random.randint(50, 100000) * 100000,
+                "status": random.choice(["Active", "Completed", "Planning", "On Hold", "Cancelled"])
+            })
+            break  # Exit the while loop and move to the next project ID
 
 # 1b. Generate Employees & 3-Tier Hierarchy (C-Suite -> Director -> Staff)
 emp_id_counter = 1
