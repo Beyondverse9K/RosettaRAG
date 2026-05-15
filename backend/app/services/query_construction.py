@@ -6,6 +6,8 @@ from app.core.config import settings
 from app.services.indexing import get_vectorstore
 from app.services.query_translation import generate_hyde_document
 from langchain_core.prompts import PromptTemplate
+from langchain_core.tools import tool
+from langgraph.prebuilt import create_react_agent
 
 # Keep-alive added to SQL to prevent timeouts
 db = SQLDatabase.from_uri(
@@ -55,12 +57,13 @@ def retrieve_from_graph(question: str) -> str:
             Instructions:
             Use only the provided relationship types and properties in the schema.
             IMPORTANT: When filtering by strings (like names or project titles), use the CONTAINS operator and toLower() to make the search case-insensitive and fuzzy (e.g., WHERE toLower(p.name) CONTAINS toLower('Zenith')).
+            CRITICAL ID MATCHING: If the user query specifies an ID (e.g., "ID P3" or "employee 149"), you MUST filter against the `id` property (e.g., WHERE p.id = 'P3' OR e.id = 149). DO NOT use the `name` property for IDs.
             NLP CLEANUP: If a user asks a question with a possessive name (e.g., "Julie Stewart's" or "Julie Stewarts subordinates"), you MUST strip the trailing 's' or "'s" before putting the name in the CONTAINS clause (e.g., use 'Julie Stewart', NOT 'Julie Stewarts').
             CRITICAL: Always return the name of the searched entity alongside the results (e.g., RETURN e.name, p.name, p.status) so the final context clearly shows who the data belongs to.
             SHOW YOUR WORK: When possible, include the filtered properties in your RETURN statement (e.g., RETURN p.name AS Project, e.dept AS Dept) so the generator sees the context. CRITICAL EXCEPTIONS: Do NOT attempt to return variables that are scoped inside subqueries (like EXISTS) or variables that would break an aggregation grouping (like count()). For complex queries, it is perfectly acceptable to just RETURN DISTINCT the final target.
             DEDUPLICATION: Always use the DISTINCT keyword in your RETURN statements (e.g., RETURN DISTINCT p.name) to prevent duplicate rows from overwhelming the system, unless you are using an aggregation function like count().
             
-            MULTI-HOP & COMPLEX EXAMPLES:
+            COMPLEX EXAMPLES:
             1. Manager to Subordinate's Projects: "What projects are Julie Stewart's subordinates contributing to?"
                MATCH (sub:Employee)-[:REPORTS_TO]->(mgr:Employee) WHERE toLower(mgr.name) CONTAINS toLower('Julie Stewart') MATCH (sub)-[:CONTRIBUTES_TO]->(p:Project) RETURN mgr.name AS Manager, sub.name AS Subordinate, p.name AS Project
 
@@ -113,7 +116,7 @@ def retrieve_from_vector(question: str) -> list[str]:
         hyde_doc = generate_hyde_document(question)
 
         # Ask Pinecone to return the similarity score alongside the documents
-        results = vectorstore.similarity_search_with_score(hyde_doc, k=6)
+        results = vectorstore.similarity_search_with_score(hyde_doc, k=15)
 
         valid_docs = []
         for doc, score in results:
@@ -124,3 +127,79 @@ def retrieve_from_vector(question: str) -> list[str]:
         return valid_docs
     except Exception as e:
         return [f"Vector Retrieval Error: {str(e)}"]
+
+# Agentic Multi-Hop Retrieval
+@tool
+def search_sql_db(query: str) -> str:
+    """Use this to find exact employee names, salaries, departments, or budgets.
+    CRITICAL: The input MUST be a natural language question (e.g., 'What is the sum of salaries for John and Mary?'), NEVER a raw SQL query."""
+    return retrieve_from_sql(query)
+
+@tool
+def search_graph_db(query: str) -> str:
+    """Use this to find reporting lines, who reports to whom, or project leadership.
+    CRITICAL: The input MUST be a natural language question (e.g., 'What projects does John lead?'), NEVER a raw Cypher query."""
+    return retrieve_from_graph(query)
+
+@tool
+def search_vector_db(query: str) -> str:
+    """Use this to find company policies, IT standards, or project wikis.
+    CRITICAL: The input MUST be a complete natural language question (e.g., 'What is the technical scope of Project X?')."""
+    docs = retrieve_from_vector(query)
+    return "\n\n".join(docs) if docs else "No documents found."
+
+def retrieve_multi_hop(question: str, messages: list = None) -> str:
+    """Agentic loop that queries databases sequentially based on LLM reasoning and history."""
+    llm = get_query_llm()
+    tools = [search_sql_db, search_graph_db, search_vector_db]
+    system_msg = (
+        "You are a sequential data retrieval agent for Chromatic Prism Corp. "
+        "Break the user's complex question down into steps and use your tools ONE AT A TIME to gather context across databases.\n\n"
+        """Always verify the user's claims about an entity's role, department, relationship like leading, contributing or reporting, 
+        and policy specific information before proceeding to the next hop. For example, if the user asks about 'the highest-paid employee
+        in Operations', your first step should be to query the SQL database to confirm the employee's name and department. Only after 
+        confirming that information should you proceed to query the graph database about that specific employee's projects, and then 
+        the vector database for project details.\n\n"""
+        "### MULTI-HOP REASONING STRATEGIES & EXAMPLES:\n"
+        "1. Budget-to-Wiki Pipeline (SQL -> Graph -> Vector):\n"
+        "   - User: 'Identify the highest-paid employee in Operations. What project do they lead, and what is the authorized budget?'\n"
+        "   - Hop 1 (search_sql_db): Find the highest-paid employee in Operations to get the name.\n"
+        "   - Hop 2 (search_graph_db): Find the projects led by that specific employee name.\n"
+        "   - Hop 3 (search_vector_db): Extract the budget and phase for that specific project from the wiki.\n\n"
+
+        "2. Cross-Departmental Intersection (Graph -> SQL):\n"
+        "   - User: 'Identify all employees who directly report to the CEO. What is the combined operating budget of their departments?'\n"
+        "   - Hop 1 (search_graph_db): Find direct reports to the CEO to get a list of names.\n"
+        "   - Hop 2 (search_sql_db): Find the total operating budget for the distinct departments those specific individuals belong to.\n\n"
+
+        "3. Tech Scope to Payroll Calculation (Vector -> Graph -> SQL):\n"
+        "   - User: 'Which project involves a scalable social network, and what is the combined salary of its contributors?'\n"
+        "   - Hop 1 (search_vector_db): Query the wiki for 'scalable social network' to get the Project Name.\n"
+        "   - Hop 2 (search_graph_db): Find all employees contributing to that Project Name to get a list of names.\n"
+        "   - Hop 3 (search_sql_db): Calculate the sum of salaries for those specific contributing employees.\n\n"
+
+        "4. Deep Hierarchy & Policy Check (SQL -> Graph -> Vector):\n"
+        "   - User: 'Find the department with the smallest operating budget. Who is the manager of its leader, and what are the CFO notification rules for their projects?'\n"
+        "   - Hop 1 (search_sql_db): Find the leader of the department with the smallest budget.\n"
+        "   - Hop 2 (search_graph_db): Find the manager of that leader AND the projects the leader leads.\n"
+        "   - Hop 3 (search_vector_db): Extract the CFO oversight rules for those specific projects.\n\n"
+
+        "5. Multi-Disciplinary Project Filter (SQL -> Graph):\n"
+        "   - User: 'Are there any projects contributed to by both Marketing and Engineering? Who leads them?'\n"
+        "   - Hop 1 (search_sql_db): Get lists of employee names/IDs for the Marketing and Engineering departments.\n"
+        "   - Hop 2 (search_graph_db): Find Project nodes with incoming CONTRIBUTES_TO edges from BOTH lists, and identify the project manager.\n\n"
+
+        "Once you have gathered all factual information required to answer the main question, output the combined facts clearly."
+    )
+
+    agent_executor = create_react_agent(llm, tools, prompt=system_msg)
+
+    # Give the agent access to the full conversation memory
+    agent_messages = []
+    if messages:
+        agent_messages.extend(messages)
+    else:
+        agent_messages.append(("human", question))
+
+    response = agent_executor.invoke({"messages": agent_messages})
+    return response["messages"][-1].content

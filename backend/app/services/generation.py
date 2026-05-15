@@ -5,10 +5,20 @@ from app.core.llm_setup import get_generator_llm, get_utility_llm
 class GradeHallucinations(BaseModel):
     binary_score: str = Field(description="Answer is grounded in the facts, 'yes' or 'no'")
 
-def generate_answer(question: str, documents: list[str]) -> str:
+def generate_answer(question: str, documents: list[str], messages: list = None) -> str:
     """Standard RAG generation with INR currency formatting and Corporate Policy guardrails."""
     llm = get_generator_llm(temperature=0.3)
     docs_str = "\n\n".join(documents)
+
+    # Format chat history
+    history_str = ""
+    if messages and len(messages) > 1:
+        history_str = "--- CONVERSATION HISTORY ---\n"
+        # We exclude the last message since it's the current question
+        for msg in messages[:-1]:
+            role = "User" if msg.type == "human" else "Assistant"
+            history_str += f"{role}: {msg.content}\n"
+        history_str += "----------------------------\n"
 
     prompt = (
         f"Answer the question based ONLY on the provided context.\n"
@@ -17,6 +27,7 @@ def generate_answer(question: str, documents: list[str]) -> str:
         f"DEDUPLICATION & AGGREGATION OVERRIDE: If the context contains a raw list of entities or aggregated numbers (e.g., `[{{'Project': 'Name'}}]` or `[{{'SubordinateCount': 5}}]`), you MUST ASSUME the database correctly pre-filtered and calculated them based on the user's exact criteria. Output the information confidently as the answer, even if the filtering criteria (like department names) are not explicitly visible in the context.\n"
         f"IMPORTANT: All monetary values must be formatted as Indian Rupees (INR) using the ₹ symbol "
         f"and the Indian numbering system (e.g., ₹5,00,00,000).\n\n"
+        f"{history_str}\n"
         f"Context: {docs_str}\n"
         f"Question: {question}\n"
         f"Answer:"

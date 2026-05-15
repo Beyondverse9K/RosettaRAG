@@ -1,12 +1,13 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Annotated
 from langgraph.graph import StateGraph, END
+from langgraph.graph.message import add_messages
 from psycopg_pool import ConnectionPool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
 from app.core.config import settings
 from app.services.routing import route_question
-from app.services.query_construction import retrieve_from_sql, retrieve_from_graph, retrieve_from_vector
+from app.services.query_construction import retrieve_from_sql, retrieve_from_graph, retrieve_from_vector, retrieve_multi_hop
 from app.services.retrieval import grade_relevance
 from app.services.generation import generate_answer, check_hallucination
 
@@ -15,7 +16,8 @@ class GraphState(TypedDict):
     generation: str
     documents: List[str]
     datasource: str
-    retries: int  # Prevents infinite self-RAG loops
+    retries: int   # Prevents infinite self-RAG loops
+    messages: Annotated[list, add_messages]
 
 
 # --- 1. Node Functions ---
@@ -28,7 +30,7 @@ def reject_node(state):
 
 def route_node(state: GraphState):
     """Routes the question and initializes the retry counter."""
-    ds = route_question(state["question"])
+    ds = route_question(state["question"], state.get("messages", []))
     return {"datasource": ds, "retries": 0}
 
 def retrieve_node(state: GraphState):
@@ -41,24 +43,31 @@ def retrieve_node(state: GraphState):
         docs.append(retrieve_from_sql(question))
     elif ds == "graph_db":
         docs.append(retrieve_from_graph(question))
+    elif ds == "multi_hop":
+        # Pass history to the agentic retriever
+        docs.append(retrieve_multi_hop(question, state.get("messages", [])))
     else:
         docs.extend(retrieve_from_vector(question))
-
     return {"documents": docs}
 
 def grade_node(state: GraphState):
     """Grades relevance."""
     valid_docs, _ = grade_relevance(state["question"], state["documents"])
-
     if not valid_docs:
         valid_docs = ["No highly relevant internal documents were found to answer this question."]
-
     return {"documents": valid_docs}
 
 def generate_node(state: GraphState):
     """Generates the final answer and increments the retry counter."""
-    answer = generate_answer(state["question"], state["documents"])
-    return {"generation": answer, "retries": state.get("retries", 0) + 1}
+    # Pass history to the generator
+    answer = generate_answer(state["question"], state["documents"], state.get("messages", []))
+    # We return the generation AND append it to the messages list as an AIMessage
+    from langchain_core.messages import AIMessage
+    return {
+        "generation": answer,
+        "retries": state.get("retries", 0) + 1,
+        "messages": [AIMessage(content=answer)]
+    }
 
 
 # --- 2. Conditional Edge Logic ---
@@ -125,6 +134,7 @@ pool = ConnectionPool(
     conninfo=settings.DATABASE_URL,
     max_size=20,
     max_lifetime=300,
+    check=ConnectionPool.check_connection,
     kwargs=connection_kwargs,
 )
 

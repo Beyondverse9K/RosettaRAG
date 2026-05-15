@@ -2,9 +2,9 @@ from pydantic import BaseModel, Field
 from app.core.llm_setup import get_utility_llm
 
 class RouteQuery(BaseModel):
-    datasource: str = Field(...,description="Choose 'vector_db', 'graph_db', 'relational_db', or 'reject' if about another company or unrelated general knowledge.",)
+    datasource: str = Field(...,description="Choose 'vector_db', 'graph_db', 'relational_db', 'multi_hop' or 'reject' if about another company or unrelated general knowledge.",)
 
-def route_question(question: str) -> str:
+def route_question(question: str, messages: list = None) -> str:
     llm = get_utility_llm(temperature=0)
     structured_llm = llm.with_structured_output(RouteQuery)
 
@@ -22,10 +22,24 @@ def route_question(question: str) -> str:
     2. graph_db: For questions about reporting lines, 'who reports to whom', or 'who leads which projects' or 'who contributes to which projects'.
     3. vector_db: For all questions about company policies, benefits, hardware, IT standards, or project wikis which includes phase and budget, team composition and technical scope.
     4. reject: Use when a foreign company name is mentioned, or the question is completely out-of-domain.
+    5. multi_hop: Use ONLY when a single question requires combining data across multiple databases (SQL, Graph, Vector).
+       EXAMPLES of multi_hop:
+       - "Identify the highest-paid employee (SQL) and list the projects they lead (Graph)."
+       - "What is the budget (Vector) of the project led by the CEO's direct reports (Graph)?"
+       - "Which project's technical scope is 'social network' (Vector), and what is the total salary of its contributors (SQL + Graph)?"
+       - "Find the department with the lowest budget (SQL). Who is the manager of its leader (Graph)?"
+       - "Are there projects contributed to by both Marketing and Engineering (SQL + Graph)?"
     """
 
-    route = structured_llm.invoke([
-        {"role": "system", "content": system_msg},
-        {"role": "user", "content": question}
-    ])
+    # Format chat history for context
+    formatted_messages = [{"role": "system", "content": system_msg}]
+    if messages:
+        # Exclude the very last message since it's the current question
+        for msg in messages[:-1]:
+            role = "user" if msg.type == "human" else "assistant"
+            formatted_messages.append({"role": role, "content": msg.content})
+
+    formatted_messages.append({"role": "user", "content": question})
+
+    route = structured_llm.invoke(formatted_messages)
     return route.datasource
