@@ -32,6 +32,10 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
         prompt = PromptTemplate(
             template="You are a grader assessing relevance of a retrieved document to a user question.\n"
                      "Document: {document}\nQuestion: {question}\n"
+                     """CRITICAL GRADING RULE: If the user asks a broad, aggregative, or plural question 
+                     (e.g., 'list all', 'what are the', 'total number'), you MUST score 'yes' if the document 
+                     contains ANY single piece of information that belongs in that list or contributes to the overall 
+                     answer. Do not reject a document just because it cannot answer the entire question on its own."""
                      "Give a binary score 'yes' or 'no' indicating if the document is relevant.",
             input_variables=["document", "question"],
         )
