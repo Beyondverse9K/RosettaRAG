@@ -28,8 +28,8 @@ export default function ChatFeed({ messages, loading }) {
             graph_db: {
                 icon: (
                     <div className="relative w-4 h-4 flex items-center justify-center mr-1">
-                        <Network className="absolute text-purple-400/40 w-4 h-4" />
-                        <Share2 className="absolute text-purple-400 w-2 h-2 rotate-90" strokeWidth={2.5} />
+                        <Network className="absolute text-orange-400/40 w-4 h-4" />
+                        <Share2 className="absolute text-orange-400 w-2 h-2 rotate-90" strokeWidth={2.5} />
                     </div>
                 ),
                 text: 'Neo4j Graph',
@@ -60,12 +60,12 @@ export default function ChatFeed({ messages, loading }) {
         const style = config[source] || {
             icon: (
                 <div className="relative w-4 h-4 flex items-center justify-center mr-1">
-                    <Split className="absolute text-slate-400/40 w-4 h-4 -rotate-90" />
-                    <Cpu className="absolute text-slate-400 w-2 h-2 animate-pulse" strokeWidth={2.5} />
+                    <Split className="absolute text-purple-400/40 w-4 h-4 -rotate-90" />
+                    <Cpu className="absolute text-purple-400 w-2 h-2 animate-pulse" strokeWidth={2.5} />
                 </div>
             ),
             text: 'Routing Engine',
-            color: 'text-indigo-400 border-indigo-400/30 bg-indigo-400/10'
+            color: 'text-purple-400 border-purple-400/30 bg-purple-400/10'
         };
 
         return (
