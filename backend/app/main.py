@@ -7,7 +7,7 @@ from app.graph.workflow import pool
 
 from langchain_core.globals import set_debug
 # Turned off for production to prevent log spam
-set_debug(False)
+set_debug(True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
