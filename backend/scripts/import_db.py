@@ -15,12 +15,9 @@ from app.core.llm_setup import get_embeddings
 load_dotenv()
 fake = Faker()
 
-# ==========================================
-# 1. SYNTHETIC DATA GENERATION ENGINE
-# ==========================================
-print("Generating Realistic Mock for Chromatic Prism Corp")
+print("Generating Realistic Mock Data for Chromatic Prism Corp")
 
-# Expanded Department, C-Suite, and Role Mapping
+# Department, C-Suite, and Role Mapping
 DEPT_STRUCTURE = {
     "Engineering": {"c_level": "CTO",
                     "roles": ["Backend Engineer", "Frontend Engineer", "DevOps Engineer", "QA Automation Engineer",
@@ -55,15 +52,12 @@ hierarchy = []  # Tuples of (employee_id, manager_id)
 project_assignments = []  # Tuples of (employee_id, project_id, role)
 used_project_names = set()
 
-# 1a. Generate 15 Projects
+# Generate 15 Projects
 for i in range(1, 16):
     while True:
-        # Generate a candidate name from your custom lists
         adj = random.choice(PROJECT_ADJECTIVES)
         noun = random.choice(PROJECT_NOUNS)
         project_name = f"Project {adj} {noun}"
-
-        # Check if we've used this exact name before
         if project_name not in used_project_names:
             used_project_names.add(project_name)
             projects.append({
@@ -72,12 +66,12 @@ for i in range(1, 16):
                 "budget": random.randint(50, 100000) * 100000,
                 "status": random.choice(["Active", "Completed", "Planning", "On Hold", "Cancelled"])
             })
-            break  # Exit the while loop and move to the next project ID
+            break
 
-# 1b. Generate Employees & 3-Tier Hierarchy (C-Suite -> Director -> Staff)
+# Generate Employees & 3-Tier Hierarchy (C-Suite -> Director -> Staff)
 emp_id_counter = 1
 
-# --- Tier 1: CEO ---
+# CEO
 ceo = {"id": emp_id_counter, "name": fake.name(), "dept": "Executive", "salary": 650000, "role": "CEO"}
 employees.append(ceo)
 emp_id_counter += 1
@@ -85,7 +79,7 @@ emp_id_counter += 1
 c_suite_execs = {}  # Map dept name to executive employee object
 directors = {}  # Map dept name to list of director employee objects
 
-# --- Tier 2: C-Suite (1 per department) ---
+# C-Suite (1 per department)
 for dept, data in DEPT_STRUCTURE.items():
     exec_emp = {
         "id": emp_id_counter,
@@ -100,7 +94,7 @@ for dept, data in DEPT_STRUCTURE.items():
     directors[dept] = []
     emp_id_counter += 1
 
-# --- Tier 3: Directors (2 per department) ---
+# Directors (2 per department)
 for dept in DEPT_STRUCTURE.keys():
     for _ in range(2):
         dir_emp = {
@@ -115,7 +109,7 @@ for dept in DEPT_STRUCTURE.keys():
         directors[dept].append(dir_emp)
         emp_id_counter += 1
 
-# --- Tier 4: Staff (120 employees distributed across departments) ---
+# Staff (120 employees distributed across departments)
 for _ in range(120):
     dept = random.choice(list(DEPT_STRUCTURE.keys()))
     role = random.choice(DEPT_STRUCTURE[dept]["roles"])
@@ -153,9 +147,8 @@ for dir_list in directors.values():
         project_assignments.append((director["id"], proj["id"], "Lead"))
 
 
-# ==========================================
-# 2. Relational DB Ingestion (Neon Postgres)
-# ==========================================
+# Relational DB Ingestion (Neon Postgres)
+
 def ingest_sql_data():
     print(f"\nStarting SQL Ingestion ({len(employees)} Employees, {len(DEPT_STRUCTURE) + 1} Departments)")
     db_url = os.getenv("MASTER_DATABASE_URL")
@@ -207,9 +200,8 @@ def ingest_sql_data():
         print(f"SQL Error: {e}")
 
 
-# ==========================================
-# 3. Graph DB Ingestion (Neo4j Aura)
-# ==========================================
+# Graph DB Ingestion (Neo4j Aura)
+
 def ingest_graph_data():
     num_hierarchy = len(hierarchy)
     num_assignments = len(project_assignments)
@@ -257,9 +249,8 @@ def ingest_graph_data():
         print(f"Graph Error: {e}")
 
 
-# ==========================================
-# 4. Vector DB Ingestion (Pinecone)
-# ==========================================
+# Vector DB Ingestion (Pinecone)
+
 def ingest_vector_data():
     print(f"\nStarting Vector Ingestion (Elaborate Dynamic Wiki & Policy Documents)")
     api_key = os.getenv("PINECONE_API_KEY")
@@ -275,7 +266,7 @@ def ingest_vector_data():
         embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2-preview", google_api_key=gemini_key)
         docs = []
 
-        # 1. EXPANDED PROJECT WIKIS (More detailed milestones and tech stacks)
+        # PROJECT WIKIS (milestones and tech stacks)
         for proj in projects:
             assigned_emps = [e for e, p, r in project_assignments if p == proj["id"]]
             emp_names = [emp["name"] for emp in employees if emp["id"] in assigned_emps]
@@ -295,7 +286,7 @@ def ingest_vector_data():
 
             docs.append(Document(page_content=content, metadata={"source": "Project_Wiki", "project_id": proj["id"]}))
 
-        # 2. ELABORATE HR & WORKPLACE POLICIES
+        # HR & WORKPLACE POLICIES
         docs.append(Document(
             page_content=f"REMOTE WORK & TELECOMMUTING POLICY (V2.4): \nScope: Applies to all full-time and part-time staff of Chromatic Prism Corp.\nGuidelines: Employees reporting directly to the CEO, {ceo['name']}, or any C-level executive (e.g., {c_suite_execs['Engineering']['name']}, the {c_suite_execs['Engineering']['role']}) are classified as 'Hybrid-Essential' and must be present at the corporate headquarters a minimum of 4 days per week (Monday-Thursday). \nStaff operating under the Director level are granted 'Flexible Remote' status. \nExceptions: Medical exceptions or permanent relocations must be documented and countersigned by the CHRO, {c_suite_execs['HR']['name']}. \nStipend: Fully remote employees are eligible for a one-time ₹15000 home office provisioning stipend upon their 90-day anniversary.",
             metadata={"source": "HR_Policy", "category": "Remote Work"}
@@ -316,7 +307,7 @@ def ingest_vector_data():
             metadata={"source": "HR_Policy", "category": "Ethics"}
         ))
 
-        # 3. ELABORATE IT, SECURITY & ENGINEERING POLICIES
+        # IT, SECURITY & ENGINEERING POLICIES
         docs.append(Document(
             page_content=f"IT HARDWARE PROVISIONING & ASSET LIFECYCLE: \nStandard Issue: New engineering hires are provisioned with an Apple MacBook Pro M3 Max or equivalent Linux workstation. Non-engineering staff are provisioned with standard ultrabooks. \nCustom Requests: Requests for specialized hardware, multi-GPU compute rigs, or testing devices must be logged via the IT Service Desk. \nFinancial Thresholds: Hardware requests exceeding a cost basis of ₹5,00,000 require secondary capital expenditure (CapEx) approval from the CFO, {c_suite_execs['Finance']['name']}. \nEnd of Life: Laptops are refreshed every 36 months. Old assets must be returned to IT for secure wiping and e-waste recycling.",
             metadata={"source": "IT_Policy", "category": "Hardware"}
@@ -337,7 +328,7 @@ def ingest_vector_data():
             metadata={"source": "Engineering_Policy", "category": "Licensing"}
         ))
 
-        # 4. ELABORATE FINANCE, LEGAL & COMPLIANCE POLICIES
+        # FINANCE, LEGAL & COMPLIANCE POLICIES
         docs.append(Document(
             page_content=f"CORPORATE TRAVEL & EXPENSE REIMBURSEMENT (T&E): \nAir Travel: Domestic flights must be booked Economy class. International flights exceeding 8 continuous hours of airtime may be booked in Premium Economy or Business Class with VP approval. \nPer Diem: Meal expenses are capped at ₹7500/day for domestic travel and ₹18000/day for international travel. Alcohol is not reimbursable unless entertaining external clients. \nSoftware Subscriptions: Unauthorized 'shadow IT' SaaS subscriptions over ₹5000/month must be pre-approved by IT and Finance. \nAuditing: Expense reports must be submitted via Confluence within 30 days. Expense anomalies and continuous violations are subject to quarterly audit by {c_suite_execs['Finance']['name']} ({c_suite_execs['Finance']['role']}).",
             metadata={"source": "Finance_Policy", "category": "Expenses"}
@@ -353,7 +344,7 @@ def ingest_vector_data():
             metadata={"source": "Legal_Policy", "category": "Privacy"}
         ))
 
-        # 5. ELABORATE BRANDING & COMMUNICATIONS
+        # BRANDING & COMMUNICATIONS
         secret_project = random.choice([p for p in projects if p["status"] == "Active"])
 
         docs.append(Document(

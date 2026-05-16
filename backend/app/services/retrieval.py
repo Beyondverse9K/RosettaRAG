@@ -13,7 +13,7 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
     valid_docs = []
     docs_to_grade = []
 
-    # 1. Immediate Bypass for Structured Data & Metadata Match
+    # Immediate Bypass for Structured Data & Metadata Match
     for doc in documents:
         doc_str = str(doc)
 
@@ -44,7 +44,7 @@ def grade_relevance(question: str, documents: list[str]) -> tuple[list[str], boo
         # If it didn't pass the deterministic checks, queue it for the LLM
         docs_to_grade.append(doc_str)
 
-    # 2. Only run the LLM Grader if we actually have fuzzy documents to grade
+    # Only run the LLM Grader if we actually have fuzzy documents to grade
     if docs_to_grade:
         llm = get_utility_llm(temperature=0)
         structured_llm = llm.with_structured_output(GradeDocuments)

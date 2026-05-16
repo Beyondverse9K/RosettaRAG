@@ -20,7 +20,7 @@ class GraphState(TypedDict):
     messages: Annotated[list, add_messages]
 
 
-# --- 1. Node Functions ---
+# Node Functions
 
 def reject_node(state):
     """Short-circuit node for out-of-domain questions. Costs 0 API calls."""
@@ -70,7 +70,7 @@ def generate_node(state: GraphState):
     }
 
 
-# --- 2. Conditional Edge Logic ---
+# Conditional Edge Logic
 
 def route_condition(state: GraphState):
     """Routes the question based on the router's output."""
@@ -86,7 +86,7 @@ def grade_generation_v_documents(state: GraphState):
     return "useful" if is_grounded else "not useful"
 
 
-# --- 3. Build the Graph ---
+# Build the Graph
 
 workflow = StateGraph(GraphState)
 
@@ -119,7 +119,7 @@ workflow.add_conditional_edges(
 workflow.add_edge("reject_node", END)
 
 
-# --- 4. Configure PostgreSQL Memory Checkpointer ---
+# Configure PostgreSQL Memory Checkpointer
 
 connection_kwargs = {
     "autocommit": True,

@@ -7,11 +7,11 @@ from app.graph.workflow import pool
 
 from langchain_core.globals import set_debug
 # Turned off for production to prevent log spam
-set_debug(True)
+set_debug(False)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: pool is already initialized in workflow.py
+    # Startup: pool is already initialized in workflow
     yield
     # Shutdown: Close the Neon connection pool gracefully
     if pool:
@@ -39,4 +39,4 @@ app.include_router(chat_router, prefix="/api")
 @app.head("/")
 @app.get("/")
 def health_check():
-    return {"status": "RosettaRAG Backend is running securely with Persistent Memory."}
+    return {"status": "Hi There, Hello! Backend is now live."}

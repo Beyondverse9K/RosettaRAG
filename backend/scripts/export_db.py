@@ -17,12 +17,11 @@ os.makedirs(BACKUP_DIR, exist_ok=True)
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-# ==========================================
 # 1. Export Relational DB (Neon Postgres) to CSV
-# ==========================================
+
 def export_sql_to_csv():
     print("Starting SQL Export...")
-    db_url = os.getenv("DATABASE_URL")
+    db_url = os.getenv("MASTER_DATABASE_URL")
     if not db_url: return print("Skipping SQL: DATABASE_URL not found.")
 
     try:
@@ -52,9 +51,8 @@ def export_sql_to_csv():
         print(f"SQL Export Error: {e}")
 
 
-# ==========================================
 # 2. Export Graph DB (Neo4j Aura) to JSON
-# ==========================================
+
 def export_graph_to_json():
     print("\nStarting Graph Export...")
     uri = os.getenv("NEO4J_URI")
@@ -100,9 +98,8 @@ def export_graph_to_json():
         print(f"Graph Export Error: {e}")
 
 
-# ==========================================
 # 3. Export Vector DB (Pinecone) to JSON
-# ==========================================
+
 def export_pinecone_to_json():
     print("\nStarting Vector Export...")
     api_key = os.getenv("PINECONE_API_KEY")
