@@ -131,7 +131,7 @@ connection_kwargs = {
 }
 # Create a connection pool using your Neon DATABASE_URL
 pool = ConnectionPool(
-    conninfo=settings.DATABASE_URL,
+    conninfo=settings.MASTER_DATABASE_URL,
     max_size=20,
     max_lifetime=300,
     check=ConnectionPool.check_connection,

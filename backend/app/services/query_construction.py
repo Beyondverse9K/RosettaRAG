@@ -1,3 +1,4 @@
+import re
 from langchain_community.utilities import SQLDatabase
 from langchain_classic.chains import create_sql_query_chain
 from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
@@ -21,6 +22,20 @@ try:
         username=settings.NEO4J_USERNAME,
         password=settings.NEO4J_PASSWORD
     ) if settings.NEO4J_URI else None
+    if graph:
+        original_query = graph.query
+        def read_only_query(query, params=None):
+            params = params or {}
+            # Regex to catch any mutating Cypher keywords (case-insensitive)
+            forbidden_pattern = re.compile(r'\b(CREATE|MERGE|SET|DELETE|REMOVE|DROP|CALL)\b', re.IGNORECASE)
+            if forbidden_pattern.search(query):
+                print(f"\nBLOCKED MALICIOUS CYPHER ATTEMPT:\n{query}\n")
+                # Return a harmless fake result to satisfy LangChain's parser
+                return [{"error": "Write operations are strictly prohibited on this database."}]
+            # If safe, execute normally
+            return original_query(query, params)
+        # Override LangChain's default graph.query method with our sandboxed version
+        graph.query = read_only_query
 except Exception as e:
     print(f"CRITICAL: Neo4j Connection Failed: {e}")
     graph = None

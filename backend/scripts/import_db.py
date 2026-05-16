@@ -158,7 +158,7 @@ for dir_list in directors.values():
 # ==========================================
 def ingest_sql_data():
     print(f"\nStarting SQL Ingestion ({len(employees)} Employees, {len(DEPT_STRUCTURE) + 1} Departments)")
-    db_url = os.getenv("DATABASE_URL")
+    db_url = os.getenv("MASTER_DATABASE_URL")
     if not db_url: return print("Skipping SQL: DATABASE_URL not found.")
 
     try:
